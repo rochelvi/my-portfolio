@@ -1,0 +1,17 @@
+# syntax=docker/dockerfile:1
+FROM nginx:1.30-alpine-slim
+
+# the stock vhost would shadow ours and listens on the privileged port 80
+RUN rm -f /etc/nginx/conf.d/default.conf
+
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY index.html /usr/share/nginx/html/index.html
+
+# unprivileged: port 8080 needs no capabilities, pid and temp files go to /tmp
+USER nginx
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=3s --retries=3 \
+    CMD wget -qO- http://127.0.0.1:8080/healthz || exit 1
+
+CMD ["nginx", "-g", "daemon off;"]

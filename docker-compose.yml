@@ -1,0 +1,28 @@
+services:
+  site:
+    build: .
+    image: daniel-portfolio:latest
+    container_name: daniel-portfolio
+    restart: unless-stopped
+
+    # bound to loopback: the reverse proxy on the host terminates TLS
+    ports:
+      - "127.0.0.1:8080:8080"
+
+    read_only: true
+    tmpfs:
+      - /tmp:size=8m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+    mem_limit: 32m
+    cpus: 0.25
+    pids_limit: 32
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"

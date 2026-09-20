@@ -271,35 +271,34 @@ section { padding: 100px 0; }
   --road-w: 62px;
   --branch: 44px;
   --junction-y: 36px;
+  --amp: 12px;
   position: relative;
   padding: 34px 0 70px;
 }
 
-/* main road */
+/* main road — a winding SVG lane, geometry is generated in JS */
 .road {
   position: absolute; z-index: 2;
   left: 50%; transform: translateX(-50%);
-  top: 0; bottom: 0; width: var(--road-w);
-  border-radius: 34px;
-  background: linear-gradient(180deg, #161d2a 0%, #0e1521 100%);
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: inset 0 0 26px rgba(0,0,0,0.65);
-  overflow: hidden;
+  /* an SVG is a replaced element: top/bottom alone would fall back to its
+     intrinsic 300x150 size, so the height has to be explicit.
+     The gaps at both ends keep the start/finish pins clear of the asphalt. */
+  top: 38px; height: calc(100% - 38px - 48px);
+  width: calc(var(--road-w) + 2 * var(--amp));
+  overflow: visible;
 }
-/* dashed lane marking */
-.road::after {
-  content: ''; position: absolute; z-index: 2;
-  left: 50%; transform: translateX(-50%);
-  top: 18px; bottom: 18px; width: 4px; border-radius: 3px;
-  background: repeating-linear-gradient(to bottom,
-    rgba(255,255,255,0.30) 0 18px, transparent 18px 40px);
+.road path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.road .edge { stroke: rgba(255,255,255,0.08); stroke-width: calc(var(--road-w) + 2px); }
+.road .body { stroke: url(#asphaltGrad); stroke-width: var(--road-w); }
+/* round cap matches the asphalt, so both ends fill in completely */
+.road .route {
+  stroke: url(#routeGrad); stroke-width: var(--road-w);
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  opacity: 0; transition: opacity .2s ease;
 }
-/* travelled part of the route */
-.road-progress {
-  position: absolute; z-index: 1;
-  left: 0; right: 0; top: 0; height: 0;
-  background: linear-gradient(180deg, rgba(0,255,156,0.35), rgba(0,102,255,0.35));
-  box-shadow: 0 0 26px rgba(0,255,156,0.30);
+.road .lane {
+  stroke: rgba(255,255,255,0.28); stroke-width: 4;
+  stroke-dasharray: 18 26;
 }
 
 /* navigator arrow */
@@ -310,7 +309,7 @@ section { padding: 100px 0; }
   width: 34px; height: 34px;
   color: var(--green-soft);
   filter: drop-shadow(0 0 10px rgba(0,255,156,0.75));
-  will-change: top;
+  will-change: top, left;
 }
 .nav-arrow svg { width: 100%; height: 100%; display: block; }
 .nav-arrow::before {
@@ -332,65 +331,83 @@ section { padding: 100px 0; }
   background: var(--bg-alt); border: 1px solid var(--border-strong);
   color: var(--green-soft);
 }
-.road-pin.start { top: -4px; }
-.road-pin.finish { bottom: 12px; border-color: rgba(0,102,255,0.4); color: var(--blue-soft); }
+.road-pin.start { top: 0; }
+.road-pin.finish { bottom: 0; border-color: rgba(0,102,255,0.4); color: var(--blue-soft); }
 
-/* branches */
-.tl-item {
-  position: relative; z-index: 3;
+/* branches: a stop may hold one or several linked cards */
+/* no z-index here: the branch must slide under the road while the junction sits on top */
+.tl-stop {
+  position: relative;
   width: calc(50% - var(--road-w) / 2 - var(--branch));
   margin-bottom: 30px;
+}
+.tl-stop:last-of-type { margin-bottom: 0; }
+.tl-stop:nth-of-type(odd) { text-align: right; }
+.tl-stop:nth-of-type(even) { margin-left: auto; }
+
+.tl-card {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 22px 24px;
   transition: border-color .35s ease, box-shadow .35s ease, background .35s ease;
 }
-.tl-item:last-of-type { margin-bottom: 0; }
-.tl-item:nth-of-type(odd) { text-align: right; }
-.tl-item:nth-of-type(even) { margin-left: auto; }
-.tl-item.passed {
+.tl-card.passed {
   border-color: var(--border-strong);
   background: var(--surface-hover);
   box-shadow: 0 0 26px rgba(0,255,156,0.10);
 }
-/* branch road */
-.tl-item::after {
-  content: ''; position: absolute;
+/* branch road — only on the card wired to the main road.
+   It runs a bit past the nominal road edge so the winding lane always covers its end. */
+.road-link::after {
+  content: ''; position: absolute; z-index: 1;
   top: calc(var(--junction-y) - 5px);
-  width: var(--branch); height: 10px;
+  width: calc(var(--branch) + var(--amp) + 10px); height: 10px;
   background: linear-gradient(180deg, #161d2a, #0e1521);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 6px;
 }
-/* junction marker on the main road */
-.tl-item::before {
-  content: ''; position: absolute; z-index: 4;
+/* junction marker, shifted by --dx to follow the curve of the road */
+.road-link::before {
+  content: ''; position: absolute; z-index: 3;
   top: calc(var(--junction-y) - 9px);
   width: 18px; height: 18px; border-radius: 50%;
   background: var(--bg-alt); border: 2px solid rgba(255,255,255,0.22);
   transition: border-color .35s ease, background .35s ease, box-shadow .35s ease;
 }
-.tl-item.passed::before {
+.road-link.passed::before {
   border-color: var(--green-soft); background: var(--green-soft);
   box-shadow: 0 0 14px rgba(0,255,156,0.7);
 }
-.tl-item:nth-of-type(odd)::after { left: 100%; }
-.tl-item:nth-of-type(even)::after { right: 100%; }
-.tl-item:nth-of-type(odd)::before {
-  left: calc(100% + var(--branch) + var(--road-w) / 2); transform: translateX(-50%);
+.tl-stop:nth-of-type(odd) .road-link::after { left: 100%; }
+.tl-stop:nth-of-type(even) .road-link::after { right: 100%; }
+.tl-stop:nth-of-type(odd) .road-link::before {
+  left: calc(100% + var(--branch) + var(--road-w) / 2 + var(--dx, 0px));
+  transform: translateX(-50%);
 }
-.tl-item:nth-of-type(even)::before {
-  right: calc(100% + var(--branch) + var(--road-w) / 2); transform: translateX(50%);
+.tl-stop:nth-of-type(even) .road-link::before {
+  right: calc(100% + var(--branch) + var(--road-w) / 2 - var(--dx, 0px));
+  transform: translateX(50%);
 }
+
+/* dash-dot link between two cards of the same company */
+.tl-gap {
+  position: relative; height: 62px;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.14);
+  transition: color .35s ease;
+}
+.tl-stop.passed .tl-gap { color: rgba(0,255,156,0.38); }
+.tl-gap svg { width: 300px; height: 62px; display: block; }
 
 .tl-date {
   font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
   color: var(--blue-soft); margin-bottom: 6px;
 }
-.tl-item h3 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+.tl-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
 .tl-org { font-size: 14px; color: var(--text-faint); margin-bottom: 10px; }
-.tl-item p { font-size: 14.5px; color: var(--text-dim); }
+.tl-card p { font-size: 14.5px; color: var(--text-dim); }
 
 /* education & certificates */
 .sub-head {
@@ -403,15 +420,27 @@ section { padding: 100px 0; }
   display: flex; gap: 14px; align-items: flex-start;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 12px; padding: 20px;
-  transition: border-color .2s ease, background .2s ease;
+  transition: transform .25s ease, border-color .25s ease, background .25s ease, box-shadow .25s ease;
 }
-.cert:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+.cert:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  box-shadow: 0 0 26px rgba(0,255,156,0.12), 0 0 50px rgba(0,102,255,0.08);
+}
 .cert-badge {
   flex: none; width: 36px; height: 36px; border-radius: 9px;
   background: rgba(0,102,255,0.10); border: 1px solid rgba(0,102,255,0.3);
   display: flex; align-items: center; justify-content: center;
   color: var(--blue-soft); font-size: 16px;
+  transition: color .25s ease, border-color .25s ease, background .25s ease;
 }
+.cert:hover .cert-badge {
+  color: var(--green-soft);
+  border-color: var(--border-strong);
+  background: rgba(57,255,20,0.10);
+}
+.cert-badge svg { width: 20px; height: 20px; display: block; overflow: visible; }
 .cert h3 { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
 .cert span { font-size: 13px; color: var(--text-faint); }
 
@@ -485,7 +514,7 @@ footer { padding: 44px 0; }
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity .55s ease, transform .55s ease; }
 .reveal.visible { opacity: 1; transform: none; }
 /* keep hover/passed transitions alive on revealed components */
-.card.reveal, .tl-item.reveal {
+.card.reveal, .cert.reveal {
   transition: opacity .5s ease, transform .3s ease, border-color .3s ease, box-shadow .3s ease, background .3s ease;
 }
 
@@ -501,21 +530,22 @@ footer { padding: 44px 0; }
   .about-wrap, .contact-wrap, .skill-groups { grid-template-columns: 1fr; gap: 36px; }
 
   /* road: single lane on the left, all branches to the right */
-  .road-map { --road-w: 38px; --branch: 26px; padding-bottom: 60px; }
-  .road { left: 0; transform: none; }
+  .road-map { --road-w: 38px; --branch: 26px; --amp: 8px; padding-bottom: 60px; }
+  .road { left: calc(-1 * var(--amp)); transform: none; }
   .road-pin { display: none; }
   .nav-arrow { left: calc(var(--road-w) / 2); width: 26px; height: 26px; }
-  .tl-item,
-  .tl-item:nth-of-type(even) {
+  .tl-stop,
+  .tl-stop:nth-of-type(even) {
     width: auto; margin-left: calc(var(--road-w) + var(--branch));
   }
-  .tl-item:nth-of-type(odd) { text-align: left; }
-  .tl-item:nth-of-type(odd)::after,
-  .tl-item:nth-of-type(even)::after { left: auto; right: 100%; }
-  .tl-item:nth-of-type(odd)::before,
-  .tl-item:nth-of-type(even)::before {
+  .tl-stop:nth-of-type(odd) { text-align: left; }
+  .tl-stop:nth-of-type(odd) .road-link::after,
+  .tl-stop:nth-of-type(even) .road-link::after { left: auto; right: 100%; }
+  .tl-stop:nth-of-type(odd) .road-link::before,
+  .tl-stop:nth-of-type(even) .road-link::before {
     left: auto; right: calc(100% + var(--branch) + var(--road-w) / 2); transform: translateX(50%);
   }
+  .tl-gap svg { width: 200px; }
 }
 @media (max-width: 560px) {
   .container { padding: 0 18px; }
@@ -623,32 +653,68 @@ footer { padding: 44px 0; }
     </div>
 
     <div class="road-map" id="roadMap">
-      <div class="road" aria-hidden="true"><div class="road-progress" id="roadProgress"></div></div>
+      <svg class="road" id="road" aria-hidden="true">
+        <defs>
+          <linearGradient id="asphaltGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#171e2c"/>
+            <stop offset="1" stop-color="#0e1521"/>
+          </linearGradient>
+          <linearGradient id="routeGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#00FF9C" stop-opacity="0.34"/>
+            <stop offset="1" stop-color="#0066FF" stop-opacity="0.34"/>
+          </linearGradient>
+        </defs>
+        <path class="edge"></path>
+        <path class="body"></path>
+        <path class="route" id="roadRoute" pathLength="1"></path>
+        <path class="lane"></path>
+      </svg>
       <div class="road-pin start" aria-hidden="true">старт</div>
 
       <div class="nav-arrow" id="navArrow" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 23 3.4 3.6a.6.6 0 0 1 .82-.78L12 6.9l7.78-4.08a.6.6 0 0 1 .82.78L12 23z"/></svg>
       </div>
 
-      <article class="tl-item reveal">
-        <div class="tl-date">3+ года</div>
-        <h3>Системный администратор</h3>
-        <div class="tl-org">IT-инфраструктура</div>
-        <p>Поддержка серверов и сетей, Active Directory, резервное копирование, антивирусная защита и мониторинг — база, с которой начался переход в security.</p>
+      <article class="tl-stop reveal">
+        <div class="tl-card road-link">
+          <div class="tl-date">3+ года</div>
+          <h3>Системный администратор</h3>
+          <div class="tl-org">IT-инфраструктура</div>
+          <p>Поддержка серверов и сетей, Active Directory, резервное копирование, антивирусная защита и мониторинг — база, с которой начался переход в security.</p>
+        </div>
       </article>
 
-      <article class="tl-item reveal">
-        <div class="tl-date">School 21</div>
-        <h3>Выпускник программы по кибербезопасности</h3>
-        <div class="tl-org">School 21</div>
-        <p>Самый юный выпускник программы — историю опубликовали в социальных сетях школы. Проекты: CTF-платформа SK21 и Attack-Defense соревнование.</p>
+      <article class="tl-stop reveal">
+        <div class="tl-card">
+          <div class="tl-date">стажировка</div>
+          <h3>Стажёр по кибербезопасности</h3>
+          <div class="tl-org">School 21</div>
+          <p>Самый юный участник программы — историю опубликовали в социальных сетях школы. Проекты: CTF-платформа SK21 и Attack-Defense соревнование.</p>
+        </div>
+
+        <div class="tl-gap" aria-hidden="true">
+          <svg viewBox="0 0 300 62" fill="none" stroke="currentColor" stroke-width="1.3"
+               stroke-dasharray="10 5 2 5" stroke-linecap="round">
+            <path d="M34 2C46 11.7 46 21.3 34 31C22 40.7 22 50.3 34 60"/>
+            <path d="M266 2C254 11.7 254 21.3 266 31C278 40.7 278 50.3 266 60" stroke-dashoffset="9"/>
+          </svg>
+        </div>
+
+        <div class="tl-card road-link">
+          <div class="tl-date">сейчас</div>
+          <h3>Куратор стажёров</h3>
+          <div class="tl-org">School 21</div>
+          <p>Сопровождаю стажёров по кибербезопасности: разбор заданий, ревью решений, менторство и помощь на проектах.</p>
+        </div>
       </article>
 
-      <article class="tl-item reveal">
-        <div class="tl-date">сейчас</div>
-        <h3>Студент, кибербезопасность</h3>
-        <div class="tl-org">ITPU</div>
-        <p>Углубляюсь в архитектуру защиты, управление рисками и стандарты информационной безопасности.</p>
+      <article class="tl-stop reveal">
+        <div class="tl-card road-link">
+          <div class="tl-date">сейчас</div>
+          <h3>Студент, кибербезопасность</h3>
+          <div class="tl-org">ITPU</div>
+          <p>Углубляюсь в архитектуру защиты, управление рисками и стандарты информационной безопасности.</p>
+        </div>
       </article>
 
       <div class="road-pin finish" aria-hidden="true">Security Architect</div>
@@ -669,11 +735,23 @@ footer { padding: 44px 0; }
     <h3 class="sub-head reveal">Образование</h3>
     <div class="cert-grid">
       <div class="cert reveal">
-        <div class="cert-badge" aria-hidden="true">◈</div>
+        <div class="cert-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5 2 8l10 4.5L22 8 12 3.5z"/>
+            <path d="M6 10.2V15c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.8"/>
+            <path d="M22 8v5"/>
+          </svg>
+        </div>
         <div><h3>ITPU</h3><span>Университет — кибербезопасность, в процессе</span></div>
       </div>
       <div class="cert reveal">
-        <div class="cert-badge" aria-hidden="true">◈</div>
+        <div class="cert-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.5 2 8l10 4.5L22 8 12 3.5z"/>
+            <path d="M6 10.2V15c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.8"/>
+            <path d="M22 8v5"/>
+          </svg>
+        </div>
         <div><h3>School 21</h3><span>Программа по кибербезопасности — выпускник</span></div>
       </div>
     </div>
@@ -681,19 +759,55 @@ footer { padding: 44px 0; }
     <h3 class="sub-head reveal">Сертификаты</h3>
     <div class="cert-grid">
       <div class="cert reveal">
-        <div class="cert-badge" aria-hidden="true">✓</div>
+        <div class="cert-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8.5 2.5h9A1.5 1.5 0 0 1 19 4v13.5c0 1.1.9 2 2 2H9"/>
+            <path d="M8.5 2.5A1.5 1.5 0 0 0 7 4v1.5h2.5"/>
+            <path d="M7 5.5v12a2 2 0 0 0 2 2"/>
+            <path d="M10 8h6M10 10.5h6M10 13h3.5"/>
+            <circle cx="16" cy="17" r="2.5"/>
+            <path d="M14.4 19l-.6 2.6 2.2-1.2 2.2 1.2-.6-2.6"/>
+          </svg>
+        </div>
         <div><h3>ISO/IEC 27001 Foundations</h3><span>Information Security Management</span></div>
       </div>
       <div class="cert reveal">
-        <div class="cert-badge" aria-hidden="true">✓</div>
+        <div class="cert-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8.5 2.5h9A1.5 1.5 0 0 1 19 4v13.5c0 1.1.9 2 2 2H9"/>
+            <path d="M8.5 2.5A1.5 1.5 0 0 0 7 4v1.5h2.5"/>
+            <path d="M7 5.5v12a2 2 0 0 0 2 2"/>
+            <path d="M10 8h6M10 10.5h6M10 13h3.5"/>
+            <circle cx="16" cy="17" r="2.5"/>
+            <path d="M14.4 19l-.6 2.6 2.2-1.2 2.2 1.2-.6-2.6"/>
+          </svg>
+        </div>
         <div><h3>Wazuh SIEM Operations</h3><span>Практика в собственном home lab</span></div>
       </div>
       <div class="cert reveal">
-        <div class="cert-badge" aria-hidden="true">✓</div>
+        <div class="cert-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8.5 2.5h9A1.5 1.5 0 0 1 19 4v13.5c0 1.1.9 2 2 2H9"/>
+            <path d="M8.5 2.5A1.5 1.5 0 0 0 7 4v1.5h2.5"/>
+            <path d="M7 5.5v12a2 2 0 0 0 2 2"/>
+            <path d="M10 8h6M10 10.5h6M10 13h3.5"/>
+            <circle cx="16" cy="17" r="2.5"/>
+            <path d="M14.4 19l-.6 2.6 2.2-1.2 2.2 1.2-.6-2.6"/>
+          </svg>
+        </div>
         <div><h3>Kaspersky Security Center</h3><span>Администрирование защиты</span></div>
       </div>
       <div class="cert reveal">
-        <div class="cert-badge" aria-hidden="true">✓</div>
+        <div class="cert-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8.5 2.5h9A1.5 1.5 0 0 1 19 4v13.5c0 1.1.9 2 2 2H9"/>
+            <path d="M8.5 2.5A1.5 1.5 0 0 0 7 4v1.5h2.5"/>
+            <path d="M7 5.5v12a2 2 0 0 0 2 2"/>
+            <path d="M10 8h6M10 10.5h6M10 13h3.5"/>
+            <circle cx="16" cy="17" r="2.5"/>
+            <path d="M14.4 19l-.6 2.6 2.2-1.2 2.2 1.2-.6-2.6"/>
+          </svg>
+        </div>
         <div><h3>CTF Achievements</h3><span>20+ решённых задач</span></div>
       </div>
     </div>
@@ -932,25 +1046,85 @@ footer { padding: 44px 0; }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  // experience road: navigator arrow follows scroll
+  // experience road: a winding lane the navigator arrow drives along
   var roadMap = document.getElementById('roadMap');
-  if (roadMap) {
+  var road = document.getElementById('road');
+  if (roadMap && road) {
     var arrow = document.getElementById('navArrow');
-    var roadProgress = document.getElementById('roadProgress');
-    var stops = roadMap.querySelectorAll('.tl-item');
+    var route = document.getElementById('roadRoute');
+    var roadPaths = road.querySelectorAll('path');
+    var stops = roadMap.querySelectorAll('.tl-stop');
     var JUNCTION_Y = 36;
+    var WAVE = 340;                   // target length of one wave, in px
+    var TWO_PI = Math.PI * 2;
+    var amp = 12, period = WAVE, centerX = 0, roadH = 0, roadLeft = 0, roadTop = 0;
+    var geom = road.querySelector('.body');
+    var totalLen = 0;
     var ticking = false;
+
+    // lane centre offset: one continuous sine down the whole road
+    function waveAt(y) {
+      return amp * Math.sin(TWO_PI * y / period);
+    }
+
+    function buildRoad() {
+      // SVG elements have no offsetLeft/offsetTop, so measure against the map
+      var roadRect = road.getBoundingClientRect();
+      var mapRect = roadMap.getBoundingClientRect();
+      roadH = roadRect.height;
+      roadLeft = roadRect.left - mapRect.left;
+      roadTop = roadRect.top - mapRect.top;
+      centerX = roadRect.width / 2;
+      amp = parseFloat(getComputedStyle(roadMap).getPropertyValue('--amp')) || 12;
+      // a whole number of waves, so the lane starts and ends dead centre
+      period = roadH / Math.max(2, Math.round(roadH / WAVE));
+
+      var d = 'M' + centerX.toFixed(2) + ' 0';
+      for (var y = 4; y < roadH; y += 4) {
+        d += 'L' + (centerX + waveAt(y)).toFixed(2) + ' ' + y;
+      }
+      d += 'L' + centerX.toFixed(2) + ' ' + roadH.toFixed(2);
+
+      road.setAttribute('viewBox', '0 0 ' + roadRect.width.toFixed(2) + ' ' + roadH.toFixed(2));
+      for (var p = 0; p < roadPaths.length; p++) roadPaths[p].setAttribute('d', d);
+      totalLen = geom.getTotalLength();
+
+      // park every junction marker on the lane centre at its own height
+      for (var i = 0; i < stops.length; i++) {
+        var link = stops[i].querySelector('.road-link');
+        if (!link) continue;
+        var jy = link.getBoundingClientRect().top - mapRect.top + JUNCTION_Y - roadTop;
+        link.style.setProperty('--dx', waveAt(jy).toFixed(2) + 'px');
+      }
+    }
 
     function drawRoad() {
       ticking = false;
       var rect = roadMap.getBoundingClientRect();
       var anchor = window.innerHeight * 0.62;
       var ratio = Math.max(0, Math.min(1, (anchor - rect.top) / rect.height));
-      var y = ratio * rect.height;
-      arrow.style.top = y + 'px';
-      roadProgress.style.height = y + 'px';
+
+      // walk the actual curve so the arrow never drifts off the asphalt
+      var at = totalLen * ratio;
+      var pt = geom.getPointAtLength(at);
+      var ahead = geom.getPointAtLength(Math.min(totalLen, at + 2));
+      var back = geom.getPointAtLength(Math.max(0, at - 2));
+      var mapY = roadTop + pt.y;
+
+      arrow.style.left = (roadLeft + pt.x) + 'px';
+      arrow.style.top = mapY + 'px';
+      arrow.style.transform = 'translate(-50%, -50%) rotate(' +
+        (-Math.atan2(ahead.x - back.x, ahead.y - back.y) * 180 / Math.PI).toFixed(2) + 'deg)';
+      route.style.strokeDashoffset = 1 - ratio;
+      route.style.opacity = ratio > 0.001 ? 1 : 0;
+
       for (var i = 0; i < stops.length; i++) {
-        stops[i].classList.toggle('passed', y >= stops[i].offsetTop + JUNCTION_Y);
+        // a stop is reached once the arrow passes the junction of its road-linked card
+        var link = stops[i].querySelector('.road-link') || stops[i];
+        var passed = mapY >= link.getBoundingClientRect().top - rect.top + JUNCTION_Y;
+        stops[i].classList.toggle('passed', passed);
+        var cards = stops[i].querySelectorAll('.tl-card');
+        for (var j = 0; j < cards.length; j++) cards[j].classList.toggle('passed', passed);
       }
     }
     function queueRoad() {
@@ -958,9 +1132,14 @@ footer { padding: 44px 0; }
       ticking = true;
       window.requestAnimationFrame(drawRoad);
     }
+    function refreshRoad() { buildRoad(); drawRoad(); }
+
     window.addEventListener('scroll', queueRoad, { passive: true });
-    window.addEventListener('resize', queueRoad);
-    drawRoad();
+    window.addEventListener('resize', refreshRoad);
+    window.addEventListener('load', refreshRoad);
+    // card heights shift once webfonts land, which moves every junction
+    if (window.ResizeObserver) new ResizeObserver(refreshRoad).observe(roadMap);
+    refreshRoad();
   }
 
   // contact form -> mailto fallback

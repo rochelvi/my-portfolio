@@ -273,7 +273,8 @@ section { padding: 100px 0; }
   --junction-y: 36px;
   --amp: 12px;
   position: relative;
-  padding: 34px 0 70px;
+  /* the lead-in keeps the first crest from being squeezed against the start */
+  padding: 74px 0 70px;
 }
 
 /* main road — a winding SVG lane, geometry is generated in JS */
@@ -306,14 +307,15 @@ section { padding: 100px 0; }
   position: absolute; z-index: 5;
   left: 50%; top: 0;
   transform: translate(-50%, -50%);
-  width: 34px; height: 34px;
-  color: var(--green-soft);
-  filter: drop-shadow(0 0 10px rgba(0,255,156,0.75));
+  width: 42px; height: 48px;
+  color: #2BE38C;
+  /* the offset shadow lifts the marker off the asphalt */
+  filter: drop-shadow(0 7px 8px rgba(0,0,0,0.62)) drop-shadow(0 0 16px rgba(0,255,156,0.45));
   will-change: top, left;
 }
 .nav-arrow svg { width: 100%; height: 100%; display: block; }
 .nav-arrow::before {
-  content: ''; position: absolute; inset: -14px; border-radius: 50%;
+  content: ''; position: absolute; z-index: -1; inset: -16px; border-radius: 50%;
   background: radial-gradient(circle, rgba(0,255,156,0.22), transparent 70%);
   animation: sonar 2.4s ease-out infinite;
 }
@@ -672,7 +674,11 @@ footer { padding: 44px 0; }
       <div class="road-pin start" aria-hidden="true">старт</div>
 
       <div class="nav-arrow" id="navArrow" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 23 3.4 3.6a.6.6 0 0 1 .82-.78L12 6.9l7.78-4.08a.6.6 0 0 1 .82.78L12 23z"/></svg>
+        <svg viewBox="0 0 40 46">
+          <path d="M20 42.4 5.4 7.2 20 14.8 34.6 7.2 20 42.4Z"
+                fill="currentColor" stroke="#ffffff" stroke-width="3.4"
+                stroke-linejoin="round" stroke-linecap="round"/>
+        </svg>
       </div>
 
       <article class="tl-stop reveal">
@@ -686,7 +692,7 @@ footer { padding: 44px 0; }
 
       <article class="tl-stop reveal">
         <div class="tl-card">
-          <div class="tl-date">стажировка</div>
+          <div class="tl-date">январь 2026 — апрель 2026</div>
           <h3>Стажёр по кибербезопасности</h3>
           <div class="tl-org">School 21</div>
           <p>Самый юный участник программы — историю опубликовали в социальных сетях школы. Проекты: CTF-платформа SK21 и Attack-Defense соревнование.</p>
@@ -1055,16 +1061,44 @@ footer { padding: 44px 0; }
     var roadPaths = road.querySelectorAll('path');
     var stops = roadMap.querySelectorAll('.tl-stop');
     var JUNCTION_Y = 36;
-    var WAVE = 340;                   // target length of one wave, in px
-    var TWO_PI = Math.PI * 2;
-    var amp = 12, period = WAVE, centerX = 0, roadH = 0, roadLeft = 0, roadTop = 0;
+    var HALF = 260;                   // preferred length of a half wave, in px
+    var amp = 12, centerX = 0, roadH = 0, roadLeft = 0, roadTop = 0;
     var geom = road.querySelector('.body');
+    var segs = [];
     var totalLen = 0;
     var ticking = false;
 
-    // lane centre offset: one continuous sine down the whole road
-    function waveAt(y) {
-      return amp * Math.sin(TWO_PI * y / period);
+    function oddNear(n) { n = Math.max(1, Math.round(n)); return n % 2 ? n : n + 1; }
+    function evenNear(n) { n = Math.max(2, Math.round(n)); return n % 2 ? n + 1 : n; }
+
+    // A cosine runs between every pair of nodes, with a whole number of half
+    // waves, so the curve keeps oscillating while each junction stays on a crest.
+    function makeSeg(a, b) {
+      var span = b.y - a.y;
+      var waves = span / HALF;
+      var fn;
+      if (a.o === 0 && b.o === 0) {
+        fn = function () { return 0; };
+      } else if (a.o === 0) {                       // lead-in: crest at the far end
+        fn = function (t) { return b.o * Math.sin(Math.PI / 2 * t); };
+      } else if (b.o === 0) {                       // run-out: crest at the near end
+        fn = function (t) { return a.o * Math.cos(Math.PI / 2 * t); };
+      } else {
+        // odd count flips the sign between crests, even count returns to it
+        var k = a.o === b.o ? evenNear(waves) : oddNear(waves);
+        fn = function (t) { return a.o * Math.cos(k * Math.PI * t); };
+      }
+      return { y0: a.y, y1: b.y, span: span, fn: fn, o1: b.o };
+    }
+
+    function offsetAt(y) {
+      for (var i = 0; i < segs.length; i++) {
+        if (y <= segs[i].y1) {
+          if (segs[i].span <= 0) return segs[i].o1;
+          return segs[i].fn((y - segs[i].y0) / segs[i].span);
+        }
+      }
+      return segs.length ? segs[segs.length - 1].o1 : 0;
     }
 
     function buildRoad() {
@@ -1076,26 +1110,36 @@ footer { padding: 44px 0; }
       roadTop = roadRect.top - mapRect.top;
       centerX = roadRect.width / 2;
       amp = parseFloat(getComputedStyle(roadMap).getPropertyValue('--amp')) || 12;
-      // a whole number of waves, so the lane starts and ends dead centre
-      period = roadH / Math.max(2, Math.round(roadH / WAVE));
 
-      var d = 'M' + centerX.toFixed(2) + ' 0';
-      for (var y = 4; y < roadH; y += 4) {
-        d += 'L' + (centerX + waveAt(y)).toFixed(2) + ' ' + y;
+      var roadMid = roadRect.left + roadRect.width / 2;
+      var nodes = [{ y: 0, o: 0 }];
+      for (var i = 0; i < stops.length; i++) {
+        var link = stops[i].querySelector('.road-link');
+        if (!link) continue;
+        // offsetTop ignores the reveal transform, getBoundingClientRect does not
+        var jyMap = stops[i].offsetTop + link.offsetTop + JUNCTION_Y;
+        stops[i]._jy = jyMap;
+        var jy = jyMap - roadTop;
+        if (jy <= 0 || jy >= roadH) continue;
+        var linkRect = link.getBoundingClientRect();
+        var side = linkRect.left + linkRect.width / 2 < roadMid ? -1 : 1;
+        nodes.push({ y: jy, o: side * amp });
+        link.style.setProperty('--dx', (side * amp).toFixed(2) + 'px');
       }
-      d += 'L' + centerX.toFixed(2) + ' ' + roadH.toFixed(2);
+      nodes.push({ y: roadH, o: 0 });
+
+      segs = [];
+      for (var s = 1; s < nodes.length; s++) segs.push(makeSeg(nodes[s - 1], nodes[s]));
+
+      var d = 'M' + (centerX + offsetAt(0)).toFixed(2) + ' 0';
+      for (var y = 4; y < roadH; y += 4) {
+        d += 'L' + (centerX + offsetAt(y)).toFixed(2) + ' ' + y;
+      }
+      d += 'L' + (centerX + offsetAt(roadH)).toFixed(2) + ' ' + roadH.toFixed(2);
 
       road.setAttribute('viewBox', '0 0 ' + roadRect.width.toFixed(2) + ' ' + roadH.toFixed(2));
       for (var p = 0; p < roadPaths.length; p++) roadPaths[p].setAttribute('d', d);
       totalLen = geom.getTotalLength();
-
-      // park every junction marker on the lane centre at its own height
-      for (var i = 0; i < stops.length; i++) {
-        var link = stops[i].querySelector('.road-link');
-        if (!link) continue;
-        var jy = link.getBoundingClientRect().top - mapRect.top + JUNCTION_Y - roadTop;
-        link.style.setProperty('--dx', waveAt(jy).toFixed(2) + 'px');
-      }
     }
 
     function drawRoad() {
@@ -1120,8 +1164,7 @@ footer { padding: 44px 0; }
 
       for (var i = 0; i < stops.length; i++) {
         // a stop is reached once the arrow passes the junction of its road-linked card
-        var link = stops[i].querySelector('.road-link') || stops[i];
-        var passed = mapY >= link.getBoundingClientRect().top - rect.top + JUNCTION_Y;
+        var passed = mapY >= (stops[i]._jy || 0);
         stops[i].classList.toggle('passed', passed);
         var cards = stops[i].querySelectorAll('.tl-card');
         for (var j = 0; j < cards.length; j++) cards[j].classList.toggle('passed', passed);

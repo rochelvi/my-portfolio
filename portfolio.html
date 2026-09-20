@@ -544,11 +544,11 @@ footer { padding: 44px 0; }
     <a href="#" class="logo"><span class="logo-mark" aria-hidden="true">D</span>Daniel</a>
     <nav aria-label="Основная навигация">
       <ul class="nav-links">
-        <li><a href="#projects">Проекты</a></li>
-        <li><a href="#skills">Навыки</a></li>
+        <li><a href="#about">Обо мне</a></li>
         <li><a href="#experience">Опыт</a></li>
         <li><a href="#certificates">Образование</a></li>
-        <li><a href="#about">Обо мне</a></li>
+        <li><a href="#skills">Навыки</a></li>
+        <li><a href="#projects">Проекты</a></li>
       </ul>
     </nav>
     <a href="#contact" class="nav-cta">Связаться</a>
@@ -558,11 +558,11 @@ footer { padding: 44px 0; }
   </div>
   <div class="mobile-menu" id="mobileMenu">
     <ul>
-      <li><a href="#projects">Проекты</a></li>
-      <li><a href="#skills">Навыки</a></li>
+      <li><a href="#about">Обо мне</a></li>
       <li><a href="#experience">Опыт</a></li>
       <li><a href="#certificates">Образование</a></li>
-      <li><a href="#about">Обо мне</a></li>
+      <li><a href="#skills">Навыки</a></li>
+      <li><a href="#projects">Проекты</a></li>
       <li><a href="#contact">Связаться</a></li>
     </ul>
   </div>
@@ -581,119 +581,34 @@ footer { padding: 44px 0; }
       <a href="#projects" class="btn-primary">Смотреть проекты</a>
       <a href="#contact" class="btn-outline">Связаться со мной</a>
     </div>
+  </div>
+</section>
 
-    <div class="metrics">
+<hr class="section-divider">
+
+<section id="about">
+  <div class="container">
+    <div class="about-wrap">
+      <div class="reveal">
+        <div class="section-tag">Обо мне</div>
+        <h2>Путь в кибербезопасность</h2>
+        <p>Начал с системного администрирования и за 3 года перешёл к специализированной работе в области кибербезопасности — от SIEM-мониторинга до архитектуры сетевой защиты.</p>
+        <p>Окончил программу кибербезопасности School 21 как самый юный выпускник, о чём School 21 рассказывала в своих промо-материалах. Сейчас учусь в ITPU и преподаю сетевую безопасность.</p>
+        <p>Цель — вырасти в Security Architect / CISO, выстраивая надёжные многоуровневые системы защиты.</p>
+      </div>
+      <div class="about-card reveal">
+        <div class="row"><span>Локация</span><span>Ташкент, Узбекистан</span></div>
+        <div class="row"><span>Опыт</span><span>3+ года sysadmin</span></div>
+        <div class="row"><span>Образование</span><span>School 21, ITPU</span></div>
+        <div class="row"><span>Преподавание</span><span>Сетевая безопасность</span></div>
+        <div class="row"><span>Языки</span><span>Русский, English, O‘zbekcha</span></div>
+        <div class="row"><span>Цель</span><span>Security Architect / CISO</span></div>
+      </div>
+    </div>
+
+    <div class="metrics reveal">
       <div class="metric"><div class="num mono">3+</div><div class="label">года опыта sysadmin</div></div>
       <div class="metric"><div class="num mono">20+</div><div class="label">решённых CTF-задач</div></div>
-    </div>
-  </div>
-</section>
-
-<hr class="section-divider">
-
-<section id="projects">
-  <div class="container">
-    <div class="section-head reveal">
-      <div class="section-tag">Проекты</div>
-      <h2>Избранные работы</h2>
-      <p>От CTF-платформ до собственной серверной инфраструктуры — вот над чем я работал.</p>
-    </div>
-    <div class="grid">
-
-      <article class="card reveal">
-        <div class="card-icon" aria-hidden="true">◎</div>
-        <h3>SK21 CTF Platform</h3>
-        <p>Веб-платформа для тестирования и экзаменов студентов School 21 по кибербезопасности: задания, автопроверка флагов, рейтинг участников.</p>
-        <div class="tags"><span class="tag">Web</span><span class="tag">CTF</span><span class="tag">Education</span></div>
-      </article>
-
-      <article class="card reveal">
-        <div class="card-icon" aria-hidden="true">⚔</div>
-        <h3>Battle of Fortresses</h3>
-        <p>Организация и проведение Attack-Defense CTF-соревнования с нуля: игровая инфраструктура, уязвимые сервисы, чекеры и скоринг.</p>
-        <div class="tags"><span class="tag">Attack-Defense</span><span class="tag">Event</span><span class="tag">Infrastructure</span></div>
-      </article>
-
-      <article class="card reveal">
-        <div class="card-icon" aria-hidden="true">▣</div>
-        <h3>Home Lab</h3>
-        <p>Самостоятельная инфраструктура на Proxmox: Wazuh для SIEM-мониторинга, Suricata как IDS, FreeIPA для централизованной аутентификации и Vaultwarden.</p>
-        <div class="tags"><span class="tag">Proxmox</span><span class="tag">SIEM</span><span class="tag">IDS</span><span class="tag">FreeIPA</span></div>
-      </article>
-
-      <article class="card reveal">
-        <div class="card-icon" aria-hidden="true">▤</div>
-        <h3>CVBuilder</h3>
-        <p>CLI-приложение для генерации резюме (cvcli.exe): шаблоны, экспорт и быстрая сборка документа из структурированных данных.</p>
-        <div class="tags"><span class="tag">Python</span><span class="tag">CLI</span></div>
-      </article>
-
-      <article class="card reveal">
-        <div class="card-icon" aria-hidden="true">⌨</div>
-        <h3>UBA.py</h3>
-        <p>Скрипт поведенческого анализа по клавиатурному почерку: сбор таймингов нажатий и выявление аномалий в профиле пользователя.</p>
-        <div class="tags"><span class="tag">Python</span><span class="tag">Behavioral Analysis</span></div>
-      </article>
-
-      <article class="card reveal">
-        <div class="card-icon" aria-hidden="true">▦</div>
-        <h3>Network Security Lab</h3>
-        <p>Практика настройки firewall (iptables), сегментации и сетевой инженерии для CTF-инфраструктуры и учебных стендов в EVE-NG.</p>
-        <div class="tags"><span class="tag">iptables</span><span class="tag">Networking</span><span class="tag">EVE-NG</span></div>
-      </article>
-
-    </div>
-  </div>
-</section>
-
-<hr class="section-divider">
-
-<section id="skills">
-  <div class="container">
-    <div class="section-head reveal">
-      <div class="section-tag">Навыки</div>
-      <h2>Технологический стек</h2>
-      <p>Инструменты и практики, с которыми я работаю ежедневно.</p>
-    </div>
-    <div class="skill-groups">
-      <div class="skill-group reveal">
-        <h3>Security Operations</h3>
-        <div class="skill-row">
-          <span class="pill">Wazuh (SIEM)</span>
-          <span class="pill">Suricata (IDS)</span>
-          <span class="pill">MITRE ATT&amp;CK</span>
-          <span class="pill">Kaspersky Security Center</span>
-          <span class="pill">OSINT</span>
-        </div>
-      </div>
-      <div class="skill-group reveal">
-        <h3>Инфраструктура</h3>
-        <div class="skill-row">
-          <span class="pill">Proxmox</span>
-          <span class="pill">Docker</span>
-          <span class="pill">Linux</span>
-          <span class="pill">Windows Server / AD</span>
-          <span class="pill">Ansible / AWX</span>
-        </div>
-      </div>
-      <div class="skill-group reveal">
-        <h3>Сети</h3>
-        <div class="skill-row">
-          <span class="pill">EVE-NG</span>
-          <span class="pill">iptables</span>
-          <span class="pill">SSL/TLS</span>
-          <span class="pill">VPN / VLAN</span>
-        </div>
-      </div>
-      <div class="skill-group reveal">
-        <h3>Разработка и процессы</h3>
-        <div class="skill-row">
-          <span class="pill">Python</span>
-          <span class="pill">Bash</span>
-          <span class="pill">Git</span>
-          <span class="pill">ISO 27001</span>
-        </div>
-      </div>
     </div>
   </div>
 </section>
@@ -795,22 +710,109 @@ footer { padding: 44px 0; }
 
 <hr class="section-divider">
 
-<section id="about">
-  <div class="container about-wrap">
-    <div class="reveal">
-      <div class="section-tag">Обо мне</div>
-      <h2>Путь в кибербезопасность</h2>
-      <p>Начал с системного администрирования и за 3 года перешёл к специализированной работе в области кибербезопасности — от SIEM-мониторинга до архитектуры сетевой защиты.</p>
-      <p>Окончил программу кибербезопасности School 21 как самый молодой выпускник, о чём School 21 рассказывала в своих промо-материалах. Сейчас учусь в ITPU и преподаю сетевую безопасность.</p>
-      <p>Цель — вырасти в Security Architect / CISO, выстраивая надёжные многоуровневые системы защиты.</p>
+<section id="skills">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="section-tag">Навыки</div>
+      <h2>Технологический стек</h2>
+      <p>Инструменты и практики, с которыми я работаю ежедневно.</p>
     </div>
-    <div class="about-card reveal">
-      <div class="row"><span>Локация</span><span>Ташкент, Узбекистан</span></div>
-      <div class="row"><span>Опыт</span><span>3+ года sysadmin</span></div>
-      <div class="row"><span>Образование</span><span>School 21, ITPU</span></div>
-      <div class="row"><span>Преподавание</span><span>Сетевая безопасность</span></div>
-      <div class="row"><span>Языки</span><span>Русский, English, O‘zbekcha</span></div>
-      <div class="row"><span>Цель</span><span>Security Architect / CISO</span></div>
+    <div class="skill-groups">
+      <div class="skill-group reveal">
+        <h3>Security Operations</h3>
+        <div class="skill-row">
+          <span class="pill">Wazuh (SIEM)</span>
+          <span class="pill">Suricata (IDS)</span>
+          <span class="pill">MITRE ATT&amp;CK</span>
+          <span class="pill">Kaspersky Security Center</span>
+          <span class="pill">OSINT</span>
+        </div>
+      </div>
+      <div class="skill-group reveal">
+        <h3>Инфраструктура</h3>
+        <div class="skill-row">
+          <span class="pill">Proxmox</span>
+          <span class="pill">Docker</span>
+          <span class="pill">Linux</span>
+          <span class="pill">Windows Server / AD</span>
+          <span class="pill">Ansible / AWX</span>
+        </div>
+      </div>
+      <div class="skill-group reveal">
+        <h3>Сети</h3>
+        <div class="skill-row">
+          <span class="pill">EVE-NG</span>
+          <span class="pill">iptables</span>
+          <span class="pill">SSL/TLS</span>
+          <span class="pill">VPN / VLAN</span>
+        </div>
+      </div>
+      <div class="skill-group reveal">
+        <h3>Разработка и процессы</h3>
+        <div class="skill-row">
+          <span class="pill">Python</span>
+          <span class="pill">Bash</span>
+          <span class="pill">Git</span>
+          <span class="pill">ISO 27001</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<section id="projects">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="section-tag">Проекты</div>
+      <h2>Избранные работы</h2>
+      <p>От CTF-платформ до собственной серверной инфраструктуры — вот над чем я работал.</p>
+    </div>
+    <div class="grid">
+
+      <article class="card reveal">
+        <div class="card-icon" aria-hidden="true">◎</div>
+        <h3>SK21 CTF Platform</h3>
+        <p>Веб-платформа для тестирования и экзаменов студентов School 21 по кибербезопасности: задания, автопроверка флагов, рейтинг участников.</p>
+        <div class="tags"><span class="tag">Web</span><span class="tag">CTF</span><span class="tag">Education</span></div>
+      </article>
+
+      <article class="card reveal">
+        <div class="card-icon" aria-hidden="true">⚔</div>
+        <h3>Battle of Fortresses</h3>
+        <p>Организация и проведение Attack-Defense CTF-соревнования с нуля: игровая инфраструктура, уязвимые сервисы, чекеры и скоринг.</p>
+        <div class="tags"><span class="tag">Attack-Defense</span><span class="tag">Event</span><span class="tag">Infrastructure</span></div>
+      </article>
+
+      <article class="card reveal">
+        <div class="card-icon" aria-hidden="true">▣</div>
+        <h3>Home Lab</h3>
+        <p>Самостоятельная инфраструктура на Proxmox: Wazuh для SIEM-мониторинга, Suricata как IDS, FreeIPA для централизованной аутентификации и Vaultwarden.</p>
+        <div class="tags"><span class="tag">Proxmox</span><span class="tag">SIEM</span><span class="tag">IDS</span><span class="tag">FreeIPA</span></div>
+      </article>
+
+      <article class="card reveal">
+        <div class="card-icon" aria-hidden="true">▤</div>
+        <h3>CVBuilder</h3>
+        <p>CLI-приложение для генерации резюме (cvcli.exe): шаблоны, экспорт и быстрая сборка документа из структурированных данных.</p>
+        <div class="tags"><span class="tag">Python</span><span class="tag">CLI</span></div>
+      </article>
+
+      <article class="card reveal">
+        <div class="card-icon" aria-hidden="true">⌨</div>
+        <h3>UBA.py</h3>
+        <p>Скрипт поведенческого анализа по клавиатурному почерку: сбор таймингов нажатий и выявление аномалий в профиле пользователя.</p>
+        <div class="tags"><span class="tag">Python</span><span class="tag">Behavioral Analysis</span></div>
+      </article>
+
+      <article class="card reveal">
+        <div class="card-icon" aria-hidden="true">▦</div>
+        <h3>Network Security Lab</h3>
+        <p>Практика настройки firewall (iptables), сегментации и сетевой инженерии для CTF-инфраструктуры и учебных стендов в EVE-NG.</p>
+        <div class="tags"><span class="tag">iptables</span><span class="tag">Networking</span><span class="tag">EVE-NG</span></div>
+      </article>
+
     </div>
   </div>
 </section>

@@ -43,17 +43,13 @@ curl    http://127.0.0.1:8080/healthz   # ok
 ## Развёртывание
 
 Контейнер отдаёт **обычный HTTP на порт 8080** и слушает только loopback —
-TLS, HTTP/2 и редиректы остаются за внешним прокси (nginx / Traefik / Cloudflare).
-Пример для nginx на хосте:
+TLS, HTTP/2 и редиректы остаются за внешним прокси.
 
-```nginx
-location / {
-    proxy_pass http://127.0.0.1:8080;
-    proxy_set_header Host              $host;
-    proxy_set_header X-Real-IP         $remote_addr;
-    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}
+Пошаговая инструкция: [`DEPLOY.md`](DEPLOY.md). Коротко, на уже настроенном
+сервере:
+
+```bash
+cd /srv/portfolio && git pull && docker compose up -d --build
 ```
 
 ## Особенности, о которых легко забыть

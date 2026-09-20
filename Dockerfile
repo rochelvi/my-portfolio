@@ -1,9 +1,10 @@
 # syntax=docker/dockerfile:1
 FROM nginx:1.30-alpine-slim
 
-# the stock vhost would shadow ours and listens on the privileged port 80
-RUN rm -f /etc/nginx/conf.d/default.conf
-
+# No RUN step on purpose: with only COPY the build never starts a container,
+# so it works on hosts where the docker bridge is broken. The stock
+# conf.d/default.conf stays in the image but is dead weight — our nginx.conf
+# replaces the whole file and never includes conf.d.
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY index.html /usr/share/nginx/html/index.html
 # резюме и прочая статика: положите файлы в assets/ в корне репозитория

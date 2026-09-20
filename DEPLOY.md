@@ -139,6 +139,41 @@ git checkout <нужный-коммит>
 docker compose up -d --build
 ```
 
+## Если Docker не может создать сеть
+
+```
+failed to create endpoint ... on network bridge:
+failed to add the host (vethXXXX) <=> sandbox (vethYYYY) pair interfaces:
+operation not supported
+```
+
+Это не про образ и не про конфиг: демон не может собрать veth-пару, то есть
+виртуальный «кабель» между хостом и контейнером. Диагностика:
+
+```bash
+systemd-detect-virt            # lxc / kvm / none — важно, см. ниже
+lsmod | grep -E 'veth|bridge'  # загружены ли модули
+sudo modprobe veth             # что скажет
+uname -r; ls /lib/modules/     # совпадает ли работающее ядро с набором модулей
+```
+
+Три обычные причины:
+
+1. **Ядро обновили, но не перезагрузились.** Модули для работающего ядра уже
+   удалены, подгрузить `veth` нечем. Лечится `sudo reboot`.
+2. **Модуль `veth` не загружен.** `sudo modprobe veth`, затем закрепить:
+   `echo veth | sudo tee /etc/modules-load.d/veth.conf`.
+3. **Это LXC-контейнер** (например, на Proxmox). Внутри непривилегированного
+   LXC создать veth нельзя. Нужно в настройках контейнера включить
+   `features: nesting=1`, а иногда и `keyctl=1`, и перезапустить его. Docker в
+   LXC вообще капризен — надёжнее поднять его в полноценной VM.
+
+Временный обходной путь, если сеть починить прямо сейчас нельзя: в
+`docker-compose.yml` убрать блок `ports` и добавить `network_mode: host`.
+Тогда veth не нужен, но контейнер займёт порт 8080 на всех интерфейсах хоста —
+закрывать его придётся файрволом, а не привязкой к loopback. Это компромисс,
+а не решение.
+
 ## Проверка после выката
 
 ```bash

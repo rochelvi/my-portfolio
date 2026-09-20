@@ -6,6 +6,8 @@ RUN rm -f /etc/nginx/conf.d/default.conf
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY index.html /usr/share/nginx/html/index.html
+# резюме и прочая статика: положите файлы в assets/ в корне репозитория
+COPY assets/ /usr/share/nginx/html/assets/
 
 # unprivileged: port 8080 needs no capabilities, pid and temp files go to /tmp
 USER nginx

@@ -392,7 +392,12 @@ section { padding: 100px 0; }
 .tl-org { font-size: 14px; color: var(--text-faint); margin-bottom: 10px; }
 .tl-item p { font-size: 14.5px; color: var(--text-dim); }
 
-/* certificates */
+/* education & certificates */
+.sub-head {
+  font-size: 14px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--text-faint); margin-bottom: 18px;
+}
+.cert-grid + .sub-head { margin-top: 46px; }
 .cert-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .cert {
   display: flex; gap: 14px; align-items: flex-start;
@@ -542,7 +547,7 @@ footer { padding: 44px 0; }
         <li><a href="#projects">Проекты</a></li>
         <li><a href="#skills">Навыки</a></li>
         <li><a href="#experience">Опыт</a></li>
-        <li><a href="#certificates">Сертификаты</a></li>
+        <li><a href="#certificates">Образование</a></li>
         <li><a href="#about">Обо мне</a></li>
       </ul>
     </nav>
@@ -556,7 +561,7 @@ footer { padding: 44px 0; }
       <li><a href="#projects">Проекты</a></li>
       <li><a href="#skills">Навыки</a></li>
       <li><a href="#experience">Опыт</a></li>
-      <li><a href="#certificates">Сертификаты</a></li>
+      <li><a href="#certificates">Образование</a></li>
       <li><a href="#about">Обо мне</a></li>
       <li><a href="#contact">Связаться</a></li>
     </ul>
@@ -734,7 +739,7 @@ footer { padding: 44px 0; }
 
       <article class="tl-item reveal">
         <div class="tl-date">сейчас</div>
-        <h3>Преподаватель курса CCNAS</h3>
+        <h3>Преподаватель по сетевой безопасности</h3>
         <div class="tl-org">Network Security</div>
         <p>Веду курс по сетевой безопасности: практические стенды, разбор атак на сетевом уровне и настройка средств защиты.</p>
       </article>
@@ -749,19 +754,25 @@ footer { padding: 44px 0; }
 <section id="certificates">
   <div class="container">
     <div class="section-head reveal">
-      <div class="section-tag">Сертификаты</div>
+      <div class="section-tag">Образование и сертификаты</div>
       <h2>Обучение и достижения</h2>
-      <p>Курсы и подтверждения квалификации. <!-- TODO: заменить на реальные сертификаты и добавить ссылки на подтверждение --></p>
+      <p>Университет, программы и подтверждения квалификации. <!-- TODO: уточнить названия, годы и добавить ссылки на подтверждение --></p>
     </div>
+
+    <h3 class="sub-head reveal">Образование</h3>
     <div class="cert-grid">
       <div class="cert reveal">
-        <div class="cert-badge" aria-hidden="true">✓</div>
-        <div><h3>CCNA Security (CCNAS)</h3><span>Cisco Networking Academy</span></div>
+        <div class="cert-badge" aria-hidden="true">◈</div>
+        <div><h3>ITPU</h3><span>Университет — кибербезопасность, в процессе</span></div>
       </div>
       <div class="cert reveal">
-        <div class="cert-badge" aria-hidden="true">✓</div>
-        <div><h3>Cybersecurity Program</h3><span>School 21</span></div>
+        <div class="cert-badge" aria-hidden="true">◈</div>
+        <div><h3>School 21</h3><span>Программа по кибербезопасности — выпускник</span></div>
       </div>
+    </div>
+
+    <h3 class="sub-head reveal">Сертификаты</h3>
+    <div class="cert-grid">
       <div class="cert reveal">
         <div class="cert-badge" aria-hidden="true">✓</div>
         <div><h3>ISO/IEC 27001 Foundations</h3><span>Information Security Management</span></div>
@@ -790,14 +801,14 @@ footer { padding: 44px 0; }
       <div class="section-tag">Обо мне</div>
       <h2>Путь в кибербезопасность</h2>
       <p>Начал с системного администрирования и за 3 года перешёл к специализированной работе в области кибербезопасности — от SIEM-мониторинга до архитектуры сетевой защиты.</p>
-      <p>Окончил программу кибербезопасности School 21 как самый молодой выпускник, о чём School 21 рассказывала в своих промо-материалах. Сейчас учусь в ITPU и преподаю курс CCNAS по сетевой безопасности.</p>
+      <p>Окончил программу кибербезопасности School 21 как самый молодой выпускник, о чём School 21 рассказывала в своих промо-материалах. Сейчас учусь в ITPU и преподаю сетевую безопасность.</p>
       <p>Цель — вырасти в Security Architect / CISO, выстраивая надёжные многоуровневые системы защиты.</p>
     </div>
     <div class="about-card reveal">
       <div class="row"><span>Локация</span><span>Ташкент, Узбекистан</span></div>
       <div class="row"><span>Опыт</span><span>3+ года sysadmin</span></div>
       <div class="row"><span>Образование</span><span>School 21, ITPU</span></div>
-      <div class="row"><span>Преподавание</span><span>CCNAS (network security)</span></div>
+      <div class="row"><span>Преподавание</span><span>Сетевая безопасность</span></div>
       <div class="row"><span>Языки</span><span>Русский, English, O‘zbekcha</span></div>
       <div class="row"><span>Цель</span><span>Security Architect / CISO</span></div>
     </div>

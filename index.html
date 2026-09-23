@@ -32,7 +32,8 @@
   --text-dim: #8B949E;
   --text-faint: #5B6472;
   --grad: linear-gradient(135deg, var(--green-soft) 0%, var(--blue) 100%);
-  --gutter: 70px;
+  --board: 1180px;
+  --gutter: max(70px, calc((100vw - var(--board)) / 2));
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 80px; background: var(--bg); }
@@ -82,7 +83,7 @@ a { color: inherit; }
 
 .section-divider { border: none; border-top: 1px dashed rgba(255,255,255,0.1); margin: 0; }
 
-.container { max-width: 1180px; margin: 0 auto; padding: 0 28px; position: relative; z-index: 2; }
+.container { max-width: var(--board); margin: 0 auto; padding: 0 28px; position: relative; z-index: 2; }
 header, footer, section { position: relative; z-index: 2; margin: 0 var(--gutter); }
 
 /* header */

@@ -115,7 +115,28 @@ sudo ufw enable
 Строже — пускать на 443 только [диапазоны Cloudflare](https://www.cloudflare.com/ips/),
 тогда origin нельзя будет открыть по IP в обход прокси.
 
-## 7. Обновление сайта
+## 7. Telegram-бот для связи
+
+Ссылка «Telegram» на сайте ведёт не в личку, а на бота-«почтовый ящик»:
+посетитель жмёт Start и пишет сообщение, бот пересылает его вам с именем,
+@username, id и временем. Отвечаете reply'ем на пересланное сообщение —
+ответ уходит посетителю. Начать диалог первым: `/send <id> <текст>`.
+
+Разовая настройка:
+
+1. В Telegram создайте бота через **@BotFather** (`/newbot`), получите токен.
+2. Узнайте свой числовой id у **@userinfobot**.
+3. На сервере в `/srv/portfolio` скопируйте `.env.example` в `.env` и впишите
+   `BOT_TOKEN` и `OWNER_CHAT_ID`.
+4. Замените `BOT_USERNAME` в `index.html` (два места: список контактов и
+   футер) на юзернейм созданного бота.
+5. `docker compose up -d --build` — сервис `bot` поднимется рядом с сайтом.
+
+Порты боту не нужны: он сам опрашивает api.telegram.org (long polling).
+Привязка reply → отправитель хранится в volume `bot-data` и переживает
+пересборку.
+
+## 8. Обновление сайта
 
 ```bash
 cd /srv/portfolio
@@ -130,7 +151,7 @@ docker compose up -d --build
 **Caching → Configuration → Purge Everything**. Сам контейнер отдаёт HTML с
 `Cache-Control: no-cache`, так что после сброса всё встанет на место.
 
-## 8. Откат
+## 9. Откат
 
 ```bash
 cd /srv/portfolio

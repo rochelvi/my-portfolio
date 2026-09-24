@@ -26,3 +26,39 @@ services:
       options:
         max-size: "5m"
         max-file: "3"
+
+  bot:
+    build: ./bot
+    image: portfolio-bot:latest
+    container_name: portfolio-bot
+    restart: unless-stopped
+
+    # токен и id владельца — в .env (см. .env.example), файл не коммитится
+    env_file:
+      - .env
+
+    # threads.json (привязка reply -> отправитель) переживает пересборку
+    volumes:
+      - bot-data:/data
+
+    # портов нет: бот сам ходит наружу к api.telegram.org (long polling)
+    read_only: true
+    tmpfs:
+      - /tmp:size=8m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+    mem_limit: 96m
+    cpus: 0.5
+    pids_limit: 32
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+volumes:
+  bot-data:
